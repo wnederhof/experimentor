@@ -23,6 +23,7 @@ features:
     treatments:
       - probability: 99
         value: gold
+        segments: []
       - probability: 1
         value: silver
         segments:

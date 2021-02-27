@@ -5,8 +5,17 @@ use std::env;
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
     let args: Vec<String> = env::args().collect();
-    let filename = args[0].to_string();
-    let port = args[1].parse::<u16>().unwrap();
+
+    if args.len() != 3 {
+        eprintln!("Syntax: <name> <port>");
+        exit(1);
+    }
+
+    let filename = args[1].to_string();
+    let port = args[2].parse::<u16>().unwrap_or_else(|_| {
+        eprintln!("Port is not a number.");
+        exit(1);
+    });
 
     let file = std::fs::File::open(filename).unwrap_or_else(|_| {
         eprintln!("Unable to read toggles.yml.");

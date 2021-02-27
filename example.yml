@@ -1,0 +1,21 @@
+---
+name: pulp_fiction
+features:
+  - name: briefcase
+    description: A briefcase full of a certain product.
+    treatments:
+      - probability: 99
+        segments: []
+        value: gold
+      - probability: 1
+        value: silver
+        segments:
+          - beta_testers
+segments:
+  - name: beta_testers
+    user_identifiers:
+      - quentin
+      - vincent_vega
+      - butch
+      - the_wolf
+
