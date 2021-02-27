@@ -2,46 +2,47 @@ use std::hash::{Hash, Hasher};
 use std::collections::hash_map::DefaultHasher;
 use rand::{SeedableRng, Rng};
 use rand_pcg::Pcg32;
+use serde::{Serialize, Deserialize};
 
-#[derive(Debug)]
-struct Context {
+#[derive(Debug, Deserialize, Clone)]
+pub struct Context {
     name: String,
     features: Vec<Feature>,
     segments: Vec<Segment>,
 }
 
-#[derive(Debug)]
-struct Feature {
+#[derive(Debug, Deserialize, Clone)]
+pub struct Feature {
     name: String,
     description: String,
     treatments: Vec<Treatment>,
 }
 
-#[derive(Debug)]
-struct Treatment {
+#[derive(Debug, Deserialize, Clone)]
+pub struct Treatment {
     probability: i8,
     segments: Vec<String>,
     value: String,
 }
 
-#[derive(Debug)]
-struct Segment {
+#[derive(Debug, Deserialize, Clone)]
+pub struct Segment {
     name: String,
     user_identifiers: Vec<String>,
 }
 
-#[derive(Debug)]
-struct Toggles {
+#[derive(Debug, Serialize, Clone)]
+pub struct Toggles {
     toggles: Vec<Toggle>
 }
 
-#[derive(Debug)]
-struct Toggle {
+#[derive(Debug, Serialize, Clone)]
+pub struct Toggle {
     name: String,
     value: String,
 }
 
-fn find_feature_toggles(user_identifier: &str, context: Context) -> Toggles {
+pub fn find_feature_toggles(user_identifier: &str, context: &Context) -> Toggles {
     Toggles {
         toggles: context.features.iter()
             .map(|feature| {
@@ -112,7 +113,7 @@ mod tests {
 
     #[test]
     fn test_find_features_empty() {
-        let actual: Toggles = find_feature_toggles("pulp_fiction", Context {
+        let actual: Toggles = find_feature_toggles("pulp_fiction", &Context {
             name: String::from("pulp_fiction"),
             features: vec!(),
             segments: vec!(),
@@ -122,7 +123,7 @@ mod tests {
 
     #[test]
     fn test_find_features_finds_treatment_settings_simple() {
-        let actual: Toggles = find_feature_toggles("pulp_fiction", Context {
+        let actual: Toggles = find_feature_toggles("pulp_fiction", &Context {
             name: String::from("pulp_fiction"),
             features: vec!(
                 Feature {
@@ -142,7 +143,7 @@ mod tests {
 
     #[test]
     fn test_find_features_finds_treatment_settings_multiple() {
-        let actual: Toggles = find_feature_toggles("wouter", Context {
+        let actual: Toggles = find_feature_toggles("wouter", &Context {
             name: String::from("pulp_fiction"),
             features: vec!(
                 Feature {
@@ -163,7 +164,7 @@ mod tests {
 
     #[test]
     fn test_segments_override_it_all() {
-        let actual: Toggles = find_feature_toggles("wouter", Context {
+        let actual: Toggles = find_feature_toggles("wouter", &Context {
             name: String::from("pulp_fiction"),
             features: vec!(
                 Feature {

@@ -56,5 +56,12 @@ And in 1% of the case and for users with identifiers (which can be anything, suc
 # Usage
 Starting the application with `experiments.yml` on port `8080`:
 ```
-experimentor -fexperiments.yml -p8080
+experimentor experiments.yml 8080
 ```
+
+# In Progress...
+For the program described above to actually work:
+- Make sure the web server accepts incoming requests.
+- Accept arguments for port and filename.
+- Optimize the code marked with `TODO` in `lib.rs`.
+- Respond with a hash table of features instead of an array.

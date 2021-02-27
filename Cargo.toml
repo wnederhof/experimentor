@@ -1,5 +1,5 @@
 [package]
-name = "experiment"
+name = "experimentor"
 version = "0.1.0"
 authors = ["Wouter Nederhof"]
 edition = "2018"

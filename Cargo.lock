@@ -536,7 +536,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "experiment"
+name = "experimentor"
 version = "0.1.0"
 dependencies = [
  "actix-web",
