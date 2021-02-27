@@ -65,6 +65,11 @@ Starting the application with `experiments.yml` on port `8080`:
 ```
 experimentor example.yml 8080
 ```
+Or from the code:
+```
+cargo run example.yml 8080
+```
+You can visit `http://localhost:8080/feature-toggles/vincent_vega` or `http://localhost:8080/feature-toggles/someone_else` to see the response.
 
 # In Progress...
 For the program described above to actually work:
