@@ -40,17 +40,23 @@ In this case, when the endpoint `/experiments/pulp_fiction`
 is called, it will in 99% of the cases yield:
 ```
 {
-  "toggles": {
-    "briefcase": "gold"
-  }
+  "toggles": [
+    {
+      "name": "briefcase",
+      "value": "gold"
+    }
+  ]
 }
 ```
 And in 1% of the case and for users with identifiers (which can be anything, such as an IP address, a username, username hash) like `quentin_tarantino_1963`, `vincent_vega`, etc:
 ```
 {
-  "toggles": {
-    "briefcase": "silver"
-  }
+  "toggles": [
+    {
+      "name": "briefcase",
+      "value": "silver"
+    }
+  ]
 }
 ```
 
@@ -62,7 +68,7 @@ experimentor experiments.yml 8080
 
 # In Progress...
 For the program described above to actually work:
-- Make sure the web server accepts incoming requests.
-- Accept arguments for port and filename.
+- X Make sure the web server accepts incoming requests.
+- X Accept arguments for port and filename.
 - Optimize the code marked with `TODO` in `lib.rs`.
 - Respond with a hash table of features instead of an array.
