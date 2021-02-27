@@ -56,5 +56,5 @@ And in 1% of the case and for users with identifiers (which can be anything, suc
 # Usage
 Starting the application with `experiments.yml` on port `8080`:
 ```
-xp -fexperiments.yml -p8080
+experimentor -fexperiments.yml -p8080
 ```
