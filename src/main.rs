@@ -1,6 +1,9 @@
 use actix_web::{web, App, HttpRequest, HttpServer, Responder};
-use std::process::exit;
+use experimentor::config;
+use experimentor::core;
+use experimentor::mapper::{convert_config_context_to_core, convert_core_toggles_to_config};
 use std::env;
+use std::process::exit;
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
@@ -14,34 +17,41 @@ async fn main() -> std::io::Result<()> {
     let filename = args[1].to_string();
 
     let port = args[2].parse::<u16>().unwrap_or_else(|_| {
-        eprintln!("Port is not a number.");
+        eprintln!("Port is not a valid number.");
         exit(1);
     });
 
     let file = std::fs::File::open(filename).unwrap_or_else(|_| {
-        eprintln!("Unable to read toggles.yml.");
+        eprintln!("Unable to open file.");
         exit(1);
     });
 
-    let context: experimentor::Context = serde_yaml::from_reader(file).unwrap_or_else(|_| {
-        eprintln!("Unable to parse toggles.yml.");
+    let context: config::Context = serde_yaml::from_reader(file).unwrap_or_else(|err| {
+        eprintln!("Unable to parse. Error: {}.", err);
         exit(1);
     });
 
     println!("Starting server on port {}.", port);
     HttpServer::new(move || {
-        App::new()
-            .data(context.clone())
-            .route("/feature-toggles/{user_identifier}", web::get().to(feature_toggles_handler))
+        App::new().data(context.clone()).route(
+            "/feature-toggles/{user_identifier}",
+            web::get().to(feature_toggles_handler),
+        )
     })
-        .bind(("127.0.0.1", port))?
-        .run()
-        .await?;
+    .bind(("127.0.0.1", port))?
+    .run()
+    .await?;
 
     Ok(())
 }
 
-async fn feature_toggles_handler(req: HttpRequest, data: web::Data<experimentor::Context>) -> impl Responder {
+async fn feature_toggles_handler(
+    req: HttpRequest,
+    data: web::Data<config::Context>,
+) -> impl Responder {
     let user_identifier = req.match_info().get("user_identifier").unwrap();
-    web::Json(experimentor::find_feature_toggles(user_identifier, data.get_ref()))
+    web::Json(convert_core_toggles_to_config(&core::find_feature_toggles(
+        user_identifier,
+        &convert_config_context_to_core(data.get_ref()),
+    )))
 }

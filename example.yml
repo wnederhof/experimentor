@@ -1,4 +1,3 @@
----
 name: pulp_fiction
 features:
   - name: briefcase
@@ -18,4 +17,3 @@ segments:
       - vincent_vega
       - butch
       - the_wolf
-
