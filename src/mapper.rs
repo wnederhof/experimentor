@@ -1,9 +1,9 @@
-use crate::config;
+use crate::user_io;
 use crate::core;
 
-/// The config representation differs from the core representation.
-/// This mapper converts the config representation to the corresponding core datastructures.
-pub fn convert_config_context_to_core(context: &config::Context) -> core::Context {
+/// The user_io representation differs from the core representation.
+/// This mapper converts the user_io representation to the corresponding core datastructures.
+pub fn convert_user_io_context_to_core(context: &user_io::Context) -> core::Context {
     core::Context {
         name: String::from(&context.name),
         features: context
@@ -42,18 +42,18 @@ pub fn convert_config_context_to_core(context: &config::Context) -> core::Contex
     }
 }
 
-pub fn convert_core_toggles_to_config(config: &core::Toggles) -> config::Toggles {
-    config::Toggles { toggles: vec![] }
+pub fn convert_core_toggles_to_user_io(user_io: &core::Toggles) -> user_io::Toggles {
+    user_io::Toggles { toggles: vec![] }
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::config::Segment;
+    use crate::user_io::Segment;
 
     #[test]
-    fn test_mappings_base() {
-        let context = convert_config_context_to_core(&config::Context {
+    fn test_convert_user_io_context_to_core_mappings_base_case() {
+        let context = convert_user_io_context_to_core(&user_io::Context {
             name: String::from("some-name"),
             features: vec![],
             segments: vec![],
@@ -64,13 +64,13 @@ mod tests {
     }
 
     #[test]
-    fn test_mappings_features() {
-        let context = convert_config_context_to_core(&config::Context {
+    fn test_convert_user_io_context_to_core_mappings_features() {
+        let context = convert_user_io_context_to_core(&user_io::Context {
             name: String::from("some-name"),
-            features: vec![config::Feature {
+            features: vec![user_io::Feature {
                 name: String::from("some-feature"),
                 description: String::from("some-description"),
-                treatments: vec![config::Treatment {
+                treatments: vec![user_io::Treatment {
                     segments: vec![String::from("segment1")],
                     probability: 10,
                     value: String::from("some-value"),
@@ -93,8 +93,8 @@ mod tests {
     }
 
     #[test]
-    fn test_mappings_segments() {
-        let context = convert_config_context_to_core(&config::Context {
+    fn test_convert_user_io_context_to_core_mappings_segments() {
+        let context = convert_user_io_context_to_core(&user_io::Context {
             name: String::from("some-name"),
             features: vec![],
             segments: vec![Segment {
@@ -108,4 +108,17 @@ mod tests {
         assert_eq!(context.segments[0].user_identifiers.len(), 1);
         assert_eq!(context.segments[0].user_identifiers[0], "someone");
     }
+
+    #[test]
+    fn test_convert_core_toggles_to_user_io_base_case() {
+        let context = convert_core_toggles_to_user_io(&core::Toggles {
+            name: String::from("some-name"),
+            features: vec![],
+            segments: vec![],
+        });
+        assert_eq!(context.name, "some-name");
+        assert_eq!(context.features.len(), 0);
+        assert_eq!(context.segments.len(), 0);
+    }
+
 }

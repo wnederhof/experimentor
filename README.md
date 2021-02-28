@@ -5,7 +5,7 @@ The focus of this application is on:
 
 - **Performance**: since Experimentor is written in Rust with Actix, Experimentor is highly performant and doesn't suffer from latency due to random garbage collection events.
 - **Scalable**: even though the same result is served if the user calls the same endpoint and the set of feature toggles is evenly distributed, Experimentor does not need a database for determining the features, but instead relies on a simple settings file. As such, Experimentor will work perfectly fine, no matter how many people use it.
-- **Practical**: simple, lightweight and licensed under the permissive MIT license makes Experimentor practical for every organization.
+- **Practical**: simple, lightweight and dual licensed under the permissive Apache 2 or MIT license at your choice makes Experimentor practical for every organization.
 
 # Example
 Imagine you are the director of Pulp Fiction. You remastered the movie and want to test if the briefcase of Marcellus Wallace should have a silver or gold glow. The original movie had a gold glow, so you want to test if the silver glow would lead to a more enthusiastic audience.
