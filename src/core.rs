@@ -2,18 +2,18 @@ use rand::{Rng, SeedableRng};
 use rand_pcg::Pcg32;
 use std::collections::hash_map::DefaultHasher;
 use std::hash::{Hash, Hasher};
+use std::collections::HashMap;
 
 #[derive(Debug)]
 pub struct Context {
     pub name: String,
     pub features: Vec<Feature>,
-    pub segments: Vec<Segment>,
+    pub segments: HashMap<String, Vec<String>>
 }
 
 #[derive(Debug)]
 pub struct Feature {
     pub name: String,
-    pub description: String,
     pub treatments: Vec<Treatment>,
 }
 
@@ -22,12 +22,6 @@ pub struct Treatment {
     pub probability: i8,
     pub segments: Vec<String>,
     pub value: String,
-}
-
-#[derive(Debug)]
-pub struct Segment {
-    pub name: String,
-    pub user_identifiers: Vec<String>,
 }
 
 #[derive(Debug)]
@@ -55,11 +49,10 @@ pub fn find_feature_toggles(user_identifier: &str, context: &Context) -> Toggles
 }
 
 fn active_treatment<'a>(user_identifier: &str, feature: &'a Feature, context: &Context) -> &'a str {
-    let segments = &context.segments;
     let mut prob = deterministic_random_probability(&context.name, user_identifier, &feature.name);
     let treatments_slice = feature.treatments.as_slice();
     let overriding_treatment =
-        find_overriding_treatment(user_identifier, segments, treatments_slice);
+        find_overriding_treatment(user_identifier, context, treatments_slice);
 
     match overriding_treatment {
         Some(treatment) => treatment,
@@ -81,19 +74,16 @@ fn active_treatment<'a>(user_identifier: &str, feature: &'a Feature, context: &C
 /// the first treatment that uses segment "beta_testers" will always be selected.
 fn find_overriding_treatment<'a>(
     user_identifier: &str,
-    segments: &Vec<Segment>,
+    context: &Context,
     treatments_slice: &'a [Treatment],
 ) -> Option<&'a String> {
     for treatment in treatments_slice {
         for treatment_segment in &treatment.segments {
-            for segment in segments {
-                if &segment.name == treatment_segment {
-                    if segment
-                        .user_identifiers
-                        .contains(&user_identifier.to_string())
-                    {
-                        return Some(&treatment.value);
-                    }
+            if let Some(user_identifiers) = context.segments.get(treatment_segment) {
+                if user_identifiers
+                    .contains(&user_identifier.to_string())
+                {
+                    return Some(&treatment.value);
                 }
             }
         }
@@ -101,8 +91,7 @@ fn find_overriding_treatment<'a>(
     None
 }
 
-/// Deterministically determine an evenly distributed number between 1 and 100 based
-/// on the context name, name and feature name.
+/// Deterministically determine an evenly distributed number between 1 and 100 based based on the input.
 fn deterministic_random_probability(context_name: &str, name: &str, feature_name: &str) -> i8 {
     let mut hasher = DefaultHasher::new();
     let to_hash = format!("{}:{}:{}", context_name, name, feature_name);
@@ -122,7 +111,7 @@ mod tests {
             &Context {
                 name: String::from("pulp_fiction"),
                 features: vec![],
-                segments: vec![],
+                segments: HashMap::new(),
             },
         );
         assert_eq!(actual.toggles.len(), 0);
@@ -136,14 +125,13 @@ mod tests {
                 name: String::from("pulp_fiction"),
                 features: vec![Feature {
                     name: String::from("briefcase"),
-                    description: String::from(""),
                     treatments: vec![Treatment {
                         probability: 100,
                         value: String::from("gold"),
                         segments: vec![],
                     }],
                 }],
-                segments: vec![],
+                segments: HashMap::new(),
             },
         );
         assert_eq!(actual.toggles.len(), 1);
@@ -159,7 +147,6 @@ mod tests {
                 name: String::from("pulp_fiction"),
                 features: vec![Feature {
                     name: String::from("briefcase"),
-                    description: String::from(""),
                     treatments: vec![
                         Treatment {
                             probability: 100,
@@ -173,7 +160,7 @@ mod tests {
                         },
                     ],
                 }],
-                segments: vec![],
+                segments: HashMap::new(),
             },
         );
         assert_eq!(actual.toggles.len(), 1);
@@ -189,7 +176,6 @@ mod tests {
                 name: String::from("pulp_fiction"),
                 features: vec![Feature {
                     name: String::from("briefcase"),
-                    description: String::from(""),
                     treatments: vec![
                         Treatment {
                             probability: 100,
@@ -203,10 +189,7 @@ mod tests {
                         },
                     ],
                 }],
-                segments: vec![Segment {
-                    name: String::from("beta-tester"),
-                    user_identifiers: vec![String::from("wouter")],
-                }],
+                segments: vec![(String::from("beta-tester"), vec![String::from("wouter")])].into_iter().collect()
             },
         );
         assert_eq!(actual.toggles.len(), 1);

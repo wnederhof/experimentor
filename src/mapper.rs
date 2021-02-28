@@ -1,5 +1,6 @@
 use crate::user_model;
 use crate::core;
+use std::collections::HashMap;
 
 pub fn map_toggles_to_toggles_response(toggles: &core::Toggles) -> user_model::TogglesResponse {
     user_model::TogglesResponse { toggles: toggles.toggles.iter().map(|toggle| user_model::ToggleResponse {
@@ -22,7 +23,6 @@ fn map_feature_configs_to_features(context: &user_model::ContextConfig) -> Vec<c
         .iter()
         .map(|feature| core::Feature {
             name: feature.name.to_string(),
-            description: feature.description.to_string(),
             treatments: feature
                 .treatments
                 .iter()
@@ -40,19 +40,22 @@ fn map_feature_configs_to_features(context: &user_model::ContextConfig) -> Vec<c
         .collect()
 }
 
-fn map_segment_configs_to_segments(context: &user_model::ContextConfig) -> Vec<core::Segment> {
+fn map_segment_configs_to_segments(context: &user_model::ContextConfig) -> HashMap<String, Vec<String>> {
+    let mut hash_map: HashMap<String, Vec<String>> = HashMap::new();
     context
         .segments
         .iter()
-        .map(|segment| core::Segment {
-            name: segment.name.to_string(),
-            user_identifiers: segment
-                .user_identifiers
-                .iter()
-                .map(|user_identifier| user_identifier.to_string())
-                .collect(),
-        })
-        .collect()
+        .for_each(|segment| {
+            hash_map.insert(
+                segment.name.to_string(),
+                segment
+                    .user_identifiers
+                    .iter()
+                    .map(|user_identifier| user_identifier.to_string())
+                    .collect());
+        }
+    );
+    hash_map
 }
 
 #[cfg(test)]
@@ -93,7 +96,6 @@ mod tests {
         assert_eq!(context.segments.len(), 0);
 
         assert_eq!(context.features[0].name, "some-feature");
-        assert_eq!(context.features[0].description, "some-description");
         assert_eq!(context.features[0].treatments.len(), 1);
         assert_eq!(context.features[0].treatments[0].segments.len(), 1);
         assert_eq!(context.features[0].treatments[0].segments[0], "segment1");
@@ -113,9 +115,9 @@ mod tests {
         });
 
         assert_eq!(context.segments.len(), 1);
-        assert_eq!(context.segments[0].name, "beta_testers");
-        assert_eq!(context.segments[0].user_identifiers.len(), 1);
-        assert_eq!(context.segments[0].user_identifiers[0], "someone");
+        assert_eq!(context.segments.contains_key("beta_testers"), true);
+        assert_eq!(context.segments.get("beta_testers").unwrap().len(), 1);
+        assert_eq!(context.segments.get("beta_testers").unwrap()[0], "someone");
     }
 
     #[test]
