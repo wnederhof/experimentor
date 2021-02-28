@@ -1,12 +1,18 @@
-use crate::user_model;
 use crate::core;
+use crate::user_model;
 use std::collections::HashMap;
 
 pub fn map_toggles_to_toggles_response(toggles: &core::Toggles) -> user_model::TogglesResponse {
-    user_model::TogglesResponse { toggles: toggles.toggles.iter().map(|toggle| user_model::ToggleResponse {
-        name: String::from(&toggle.name),
-        value: String::from(&toggle.value),
-    }).collect() }
+    user_model::TogglesResponse {
+        toggles: toggles
+            .toggles
+            .iter()
+            .map(|toggle| user_model::ToggleResponse {
+                name: String::from(&toggle.name),
+                value: String::from(&toggle.value),
+            })
+            .collect(),
+    }
 }
 
 pub fn map_context_config_to_context(context: &user_model::ContextConfig) -> core::Context {
@@ -40,21 +46,20 @@ fn map_feature_configs_to_features(context: &user_model::ContextConfig) -> Vec<c
         .collect()
 }
 
-fn map_segment_configs_to_segments(context: &user_model::ContextConfig) -> HashMap<String, Vec<String>> {
+fn map_segment_configs_to_segments(
+    context: &user_model::ContextConfig,
+) -> HashMap<String, Vec<String>> {
     let mut hash_map: HashMap<String, Vec<String>> = HashMap::new();
-    context
-        .segments
-        .iter()
-        .for_each(|segment| {
-            hash_map.insert(
-                segment.name.to_string(),
-                segment
-                    .user_identifiers
-                    .iter()
-                    .map(|user_identifier| user_identifier.to_string())
-                    .collect());
-        }
-    );
+    context.segments.iter().for_each(|segment| {
+        hash_map.insert(
+            segment.name.to_string(),
+            segment
+                .user_identifiers
+                .iter()
+                .map(|user_identifier| user_identifier.to_string())
+                .collect(),
+        );
+    });
     hash_map
 }
 
@@ -122,9 +127,7 @@ mod tests {
 
     #[test]
     fn test_map_feature_configs_to_features_base_case() {
-        let context = map_toggles_to_toggles_response(&core::Toggles {
-            toggles: vec!()
-        });
+        let context = map_toggles_to_toggles_response(&core::Toggles { toggles: vec![] });
         assert_eq!(context.toggles.len(), 0);
     }
 
@@ -133,12 +136,11 @@ mod tests {
         let context = map_toggles_to_toggles_response(&core::Toggles {
             toggles: vec![core::Toggle {
                 name: String::from("feature"),
-                value: String::from("value")
-            }]
+                value: String::from("value"),
+            }],
         });
         assert_eq!(context.toggles.len(), 1);
         assert_eq!(context.toggles[0].name, "feature");
         assert_eq!(context.toggles[0].value, "value");
     }
-
 }

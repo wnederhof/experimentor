@@ -1,14 +1,14 @@
 use rand::{Rng, SeedableRng};
 use rand_pcg::Pcg32;
 use std::collections::hash_map::DefaultHasher;
-use std::hash::{Hash, Hasher};
 use std::collections::HashMap;
+use std::hash::{Hash, Hasher};
 
 #[derive(Debug)]
 pub struct Context {
     pub name: String,
     pub features: Vec<Feature>,
-    pub segments: HashMap<String, Vec<String>>
+    pub segments: HashMap<String, Vec<String>>,
 }
 
 #[derive(Debug)]
@@ -80,9 +80,7 @@ fn find_overriding_treatment<'a>(
     for treatment in treatments_slice {
         for treatment_segment in &treatment.segments {
             if let Some(user_identifiers) = context.segments.get(treatment_segment) {
-                if user_identifiers
-                    .contains(&user_identifier.to_string())
-                {
+                if user_identifiers.contains(&user_identifier.to_string()) {
                     return Some(&treatment.value);
                 }
             }
@@ -189,7 +187,9 @@ mod tests {
                         },
                     ],
                 }],
-                segments: vec![(String::from("beta-tester"), vec![String::from("wouter")])].into_iter().collect()
+                segments: vec![(String::from("beta-tester"), vec![String::from("wouter")])]
+                    .into_iter()
+                    .collect(),
             },
         );
         assert_eq!(actual.toggles.len(), 1);

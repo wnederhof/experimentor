@@ -1,7 +1,7 @@
 use actix_web::{web, App, HttpRequest, HttpServer, Responder};
-use experimentor::user_model;
 use experimentor::core;
 use experimentor::mapper::{map_context_config_to_context, map_toggles_to_toggles_response};
+use experimentor::user_model;
 use std::env;
 use std::process::exit;
 
@@ -50,8 +50,10 @@ async fn feature_toggles_handler(
     data: web::Data<user_model::ContextConfig>,
 ) -> impl Responder {
     let user_identifier = req.match_info().get("user_identifier").unwrap();
-    web::Json(map_toggles_to_toggles_response(&core::find_feature_toggles(
-        user_identifier,
-        &map_context_config_to_context(data.get_ref()),
-    )))
+    web::Json(map_toggles_to_toggles_response(
+        &core::find_feature_toggles(
+            user_identifier,
+            &map_context_config_to_context(data.get_ref()),
+        ),
+    ))
 }

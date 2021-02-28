@@ -73,5 +73,4 @@ You can visit `http://localhost:8080/feature-toggles/vincent_vega` or `http://lo
 
 # In Progress...
 For the program described above to actually work:
-- Optimize the code marked with `TODO` in `lib.rs`.
 - Respond with a hash table of features instead of an array.
