@@ -84,9 +84,6 @@ fn find_overriding_treatment<'a>(
     segments: &Vec<Segment>,
     treatments_slice: &'a [Treatment],
 ) -> Option<&'a String> {
-    // TODO very inefficient at O(n * m * o).
-    // Should be implemented using hash tables.
-
     for treatment in treatments_slice {
         for treatment_segment in &treatment.segments {
             for segment in segments {

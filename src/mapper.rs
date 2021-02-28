@@ -27,7 +27,18 @@ pub fn convert_config_context_to_core(context: &config::Context) -> core::Contex
                     .collect(),
             })
             .collect(),
-        segments: vec![],
+        segments: context
+            .segments
+            .iter()
+            .map(|segment| core::Segment {
+                name: segment.name.to_string(),
+                user_identifiers: segment
+                    .user_identifiers
+                    .iter()
+                    .map(|u| u.to_string())
+                    .collect(),
+            })
+            .collect(),
     }
 }
 
