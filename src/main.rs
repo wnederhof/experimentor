@@ -1,7 +1,7 @@
 use actix_web::{web, App, HttpRequest, HttpServer, Responder};
-use experimentor::user_io;
+use experimentor::user_model;
 use experimentor::core;
-use experimentor::mapper::{convert_user_io_context_to_core, convert_core_toggles_to_user_io};
+use experimentor::mapper::{convert_user_model_context_to_core, convert_core_toggles_to_user_model};
 use std::env;
 use std::process::exit;
 
@@ -26,7 +26,7 @@ async fn main() -> std::io::Result<()> {
         exit(1);
     });
 
-    let context: user_io::Context = serde_yaml::from_reader(file).unwrap_or_else(|err| {
+    let context: user_model::ContextConfig = serde_yaml::from_reader(file).unwrap_or_else(|err| {
         eprintln!("Unable to parse. Error: {}.", err);
         exit(1);
     });
@@ -47,11 +47,11 @@ async fn main() -> std::io::Result<()> {
 
 async fn feature_toggles_handler(
     req: HttpRequest,
-    data: web::Data<user_io::Context>,
+    data: web::Data<user_model::ContextConfig>,
 ) -> impl Responder {
     let user_identifier = req.match_info().get("user_identifier").unwrap();
-    web::Json(convert_core_toggles_to_user_io(&core::find_feature_toggles(
+    web::Json(convert_core_toggles_to_user_model(&core::find_feature_toggles(
         user_identifier,
-        &convert_user_io_context_to_core(data.get_ref()),
+        &convert_user_model_context_to_core(data.get_ref()),
     )))
 }

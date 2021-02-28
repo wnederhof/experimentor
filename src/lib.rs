@@ -1,3 +1,3 @@
-pub mod user_io;
+pub mod user_model;
 pub mod core;
 pub mod mapper;

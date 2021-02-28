@@ -1,9 +1,9 @@
-use crate::user_io;
+use crate::user_model;
 use crate::core;
 
-/// The user_io representation differs from the core representation.
-/// This mapper converts the user_io representation to the corresponding core datastructures.
-pub fn convert_user_io_context_to_core(context: &user_io::Context) -> core::Context {
+/// The user_model representation differs from the core representation.
+/// This mapper converts the user_model representation to the corresponding core datastructures.
+pub fn convert_user_model_context_to_core(context: &user_model::ContextConfig) -> core::Context {
     core::Context {
         name: String::from(&context.name),
         features: context
@@ -42,8 +42,8 @@ pub fn convert_user_io_context_to_core(context: &user_io::Context) -> core::Cont
     }
 }
 
-pub fn convert_core_toggles_to_user_io(toggles: &core::Toggles) -> user_io::Toggles {
-    user_io::Toggles { toggles: toggles.toggles.iter().map(|toggle| user_io::Toggle {
+pub fn convert_core_toggles_to_user_model(toggles: &core::Toggles) -> user_model::TogglesResponse {
+    user_model::TogglesResponse { toggles: toggles.toggles.iter().map(|toggle| user_model::ToggleResponse {
         name: String::from(&toggle.name),
         value: String::from(&toggle.value),
     }).collect() }
@@ -52,11 +52,11 @@ pub fn convert_core_toggles_to_user_io(toggles: &core::Toggles) -> user_io::Togg
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::user_io::Segment;
+    use crate::user_model::SegmentConfig;
 
     #[test]
-    fn test_convert_user_io_context_to_core_mappings_base_case() {
-        let context = convert_user_io_context_to_core(&user_io::Context {
+    fn test_convert_user_model_context_to_core_mappings_base_case() {
+        let context = convert_user_model_context_to_core(&user_model::ContextConfig {
             name: String::from("some-name"),
             features: vec![],
             segments: vec![],
@@ -67,13 +67,13 @@ mod tests {
     }
 
     #[test]
-    fn test_convert_user_io_context_to_core_maps_features() {
-        let context = convert_user_io_context_to_core(&user_io::Context {
+    fn test_convert_user_model_context_to_core_maps_features() {
+        let context = convert_user_model_context_to_core(&user_model::ContextConfig {
             name: String::from("some-name"),
-            features: vec![user_io::Feature {
+            features: vec![user_model::FeatureConfig {
                 name: String::from("some-feature"),
                 description: String::from("some-description"),
-                treatments: vec![user_io::Treatment {
+                treatments: vec![user_model::TreatmentConfig {
                     segments: vec![String::from("segment1")],
                     probability: 10,
                     value: String::from("some-value"),
@@ -96,11 +96,11 @@ mod tests {
     }
 
     #[test]
-    fn test_convert_user_io_context_to_core_maps_segments() {
-        let context = convert_user_io_context_to_core(&user_io::Context {
+    fn test_convert_user_model_context_to_core_maps_segments() {
+        let context = convert_user_model_context_to_core(&user_model::ContextConfig {
             name: String::from("some-name"),
             features: vec![],
-            segments: vec![Segment {
+            segments: vec![SegmentConfig {
                 name: String::from("beta_testers"),
                 user_identifiers: vec![String::from("someone")],
             }],
@@ -113,16 +113,16 @@ mod tests {
     }
 
     #[test]
-    fn test_convert_core_toggles_to_user_io_base_case() {
-        let context = convert_core_toggles_to_user_io(&core::Toggles {
+    fn test_convert_core_toggles_to_user_model_base_case() {
+        let context = convert_core_toggles_to_user_model(&core::Toggles {
             toggles: vec!()
         });
         assert_eq!(context.toggles.len(), 0);
     }
 
     #[test]
-    fn test_convert_core_toggles_to_user_io_maps_toggles() {
-        let context = convert_core_toggles_to_user_io(&core::Toggles {
+    fn test_convert_core_toggles_to_user_model_maps_toggles() {
+        let context = convert_core_toggles_to_user_model(&core::Toggles {
             toggles: vec![core::Toggle {
                 name: String::from("feature"),
                 value: String::from("value")
