@@ -95,6 +95,6 @@ mod tests {
         assert_eq!(context.segments.len(), 1);
         assert_eq!(context.segments[0].name, "beta_testers");
         assert_eq!(context.segments[0].user_identifiers.len(), 1);
-        assert_eq!(context.segments[0].user_identifiers[0].name, "someone");
+        assert_eq!(context.segments[0].user_identifiers[0], "someone");
     }
 }
