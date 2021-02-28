@@ -1,15 +1,22 @@
 use crate::user_model;
 use crate::core;
 
-pub fn convert_user_model_context_to_core(context: &user_model::ContextConfig) -> core::Context {
+pub fn map_toggles_to_toggles_response(toggles: &core::Toggles) -> user_model::TogglesResponse {
+    user_model::TogglesResponse { toggles: toggles.toggles.iter().map(|toggle| user_model::ToggleResponse {
+        name: String::from(&toggle.name),
+        value: String::from(&toggle.value),
+    }).collect() }
+}
+
+pub fn map_context_config_to_context(context: &user_model::ContextConfig) -> core::Context {
     core::Context {
         name: String::from(&context.name),
-        features: map_user_model_features_to_core(context),
-        segments: map_core_segments_to_user_model(context),
+        features: map_feature_configs_to_features(context),
+        segments: map_segment_configs_to_segments(context),
     }
 }
 
-fn map_user_model_features_to_core(context: &user_model::ContextConfig) -> Vec<core::Feature> {
+fn map_feature_configs_to_features(context: &user_model::ContextConfig) -> Vec<core::Feature> {
     context
         .features
         .iter()
@@ -33,7 +40,7 @@ fn map_user_model_features_to_core(context: &user_model::ContextConfig) -> Vec<c
         .collect()
 }
 
-fn map_core_segments_to_user_model(context: &user_model::ContextConfig) -> Vec<core::Segment> {
+fn map_segment_configs_to_segments(context: &user_model::ContextConfig) -> Vec<core::Segment> {
     context
         .segments
         .iter()
@@ -48,21 +55,14 @@ fn map_core_segments_to_user_model(context: &user_model::ContextConfig) -> Vec<c
         .collect()
 }
 
-pub fn convert_core_toggles_to_user_model(toggles: &core::Toggles) -> user_model::TogglesResponse {
-    user_model::TogglesResponse { toggles: toggles.toggles.iter().map(|toggle| user_model::ToggleResponse {
-        name: String::from(&toggle.name),
-        value: String::from(&toggle.value),
-    }).collect() }
-}
-
 #[cfg(test)]
 mod tests {
     use super::*;
     use crate::user_model::SegmentConfig;
 
     #[test]
-    fn test_convert_user_model_context_to_core_mappings_base_case() {
-        let context = convert_user_model_context_to_core(&user_model::ContextConfig {
+    fn test_map_context_config_to_context_base_case() {
+        let context = map_context_config_to_context(&user_model::ContextConfig {
             name: String::from("some-name"),
             features: vec![],
             segments: vec![],
@@ -73,8 +73,8 @@ mod tests {
     }
 
     #[test]
-    fn test_convert_user_model_context_to_core_maps_features() {
-        let context = convert_user_model_context_to_core(&user_model::ContextConfig {
+    fn test_map_context_config_to_context_maps_features() {
+        let context = map_context_config_to_context(&user_model::ContextConfig {
             name: String::from("some-name"),
             features: vec![user_model::FeatureConfig {
                 name: String::from("some-feature"),
@@ -102,8 +102,8 @@ mod tests {
     }
 
     #[test]
-    fn test_convert_user_model_context_to_core_maps_segments() {
-        let context = convert_user_model_context_to_core(&user_model::ContextConfig {
+    fn test_map_context_config_to_context_maps_segments() {
+        let context = map_context_config_to_context(&user_model::ContextConfig {
             name: String::from("some-name"),
             features: vec![],
             segments: vec![SegmentConfig {
@@ -119,16 +119,16 @@ mod tests {
     }
 
     #[test]
-    fn test_convert_core_toggles_to_user_model_base_case() {
-        let context = convert_core_toggles_to_user_model(&core::Toggles {
+    fn test_map_feature_configs_to_features_base_case() {
+        let context = map_toggles_to_toggles_response(&core::Toggles {
             toggles: vec!()
         });
         assert_eq!(context.toggles.len(), 0);
     }
 
     #[test]
-    fn test_convert_core_toggles_to_user_model_maps_toggles() {
-        let context = convert_core_toggles_to_user_model(&core::Toggles {
+    fn test_map_feature_configs_to_features_maps_toggles() {
+        let context = map_toggles_to_toggles_response(&core::Toggles {
             toggles: vec![core::Toggle {
                 name: String::from("feature"),
                 value: String::from("value")
