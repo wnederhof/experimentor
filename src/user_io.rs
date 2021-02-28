@@ -34,6 +34,6 @@ pub struct Toggles {
 
 #[derive(Debug, Serialize, Clone)]
 pub struct Toggle {
-    name: String,
-    value: String,
+    pub name: String,
+    pub value: String,
 }

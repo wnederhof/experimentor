@@ -35,15 +35,18 @@ pub fn convert_user_io_context_to_core(context: &user_io::Context) -> core::Cont
                 user_identifiers: segment
                     .user_identifiers
                     .iter()
-                    .map(|u| u.to_string())
+                    .map(|user_identifier| user_identifier.to_string())
                     .collect(),
             })
             .collect(),
     }
 }
 
-pub fn convert_core_toggles_to_user_io(user_io: &core::Toggles) -> user_io::Toggles {
-    user_io::Toggles { toggles: vec![] }
+pub fn convert_core_toggles_to_user_io(toggles: &core::Toggles) -> user_io::Toggles {
+    user_io::Toggles { toggles: toggles.toggles.iter().map(|toggle| user_io::Toggle {
+        name: String::from(&toggle.name),
+        value: String::from(&toggle.value),
+    }).collect() }
 }
 
 #[cfg(test)]
@@ -64,7 +67,7 @@ mod tests {
     }
 
     #[test]
-    fn test_convert_user_io_context_to_core_mappings_features() {
+    fn test_convert_user_io_context_to_core_maps_features() {
         let context = convert_user_io_context_to_core(&user_io::Context {
             name: String::from("some-name"),
             features: vec![user_io::Feature {
@@ -93,7 +96,7 @@ mod tests {
     }
 
     #[test]
-    fn test_convert_user_io_context_to_core_mappings_segments() {
+    fn test_convert_user_io_context_to_core_maps_segments() {
         let context = convert_user_io_context_to_core(&user_io::Context {
             name: String::from("some-name"),
             features: vec![],
@@ -112,13 +115,22 @@ mod tests {
     #[test]
     fn test_convert_core_toggles_to_user_io_base_case() {
         let context = convert_core_toggles_to_user_io(&core::Toggles {
-            name: String::from("some-name"),
-            features: vec![],
-            segments: vec![],
+            toggles: vec!()
         });
-        assert_eq!(context.name, "some-name");
-        assert_eq!(context.features.len(), 0);
-        assert_eq!(context.segments.len(), 0);
+        assert_eq!(context.toggles.len(), 0);
+    }
+
+    #[test]
+    fn test_convert_core_toggles_to_user_io_maps_toggles() {
+        let context = convert_core_toggles_to_user_io(&core::Toggles {
+            toggles: vec![core::Toggle {
+                name: String::from("feature"),
+                value: String::from("value")
+            }]
+        });
+        assert_eq!(context.toggles.len(), 1);
+        assert_eq!(context.toggles[0].name, "feature");
+        assert_eq!(context.toggles[0].value, "value");
     }
 
 }
