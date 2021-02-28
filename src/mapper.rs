@@ -1,45 +1,51 @@
 use crate::user_model;
 use crate::core;
 
-/// The user_model representation differs from the core representation.
-/// This mapper converts the user_model representation to the corresponding core datastructures.
 pub fn convert_user_model_context_to_core(context: &user_model::ContextConfig) -> core::Context {
     core::Context {
         name: String::from(&context.name),
-        features: context
-            .features
-            .iter()
-            .map(|feature| core::Feature {
-                name: feature.name.to_string(),
-                description: feature.description.to_string(),
-                treatments: feature
-                    .treatments
-                    .iter()
-                    .map(|treatment| core::Treatment {
-                        probability: treatment.probability,
-                        segments: treatment
-                            .segments
-                            .iter()
-                            .map(|segment| segment.to_string())
-                            .collect(),
-                        value: treatment.value.to_string(),
-                    })
-                    .collect(),
-            })
-            .collect(),
-        segments: context
-            .segments
-            .iter()
-            .map(|segment| core::Segment {
-                name: segment.name.to_string(),
-                user_identifiers: segment
-                    .user_identifiers
-                    .iter()
-                    .map(|user_identifier| user_identifier.to_string())
-                    .collect(),
-            })
-            .collect(),
+        features: map_user_model_features_to_core(context),
+        segments: map_core_segments_to_user_model(context),
     }
+}
+
+fn map_user_model_features_to_core(context: &user_model::ContextConfig) -> Vec<core::Feature> {
+    context
+        .features
+        .iter()
+        .map(|feature| core::Feature {
+            name: feature.name.to_string(),
+            description: feature.description.to_string(),
+            treatments: feature
+                .treatments
+                .iter()
+                .map(|treatment| core::Treatment {
+                    probability: treatment.probability,
+                    segments: treatment
+                        .segments
+                        .iter()
+                        .map(|segment| segment.to_string())
+                        .collect(),
+                    value: treatment.value.to_string(),
+                })
+                .collect(),
+        })
+        .collect()
+}
+
+fn map_core_segments_to_user_model(context: &user_model::ContextConfig) -> Vec<core::Segment> {
+    context
+        .segments
+        .iter()
+        .map(|segment| core::Segment {
+            name: segment.name.to_string(),
+            user_identifiers: segment
+                .user_identifiers
+                .iter()
+                .map(|user_identifier| user_identifier.to_string())
+                .collect(),
+        })
+        .collect()
 }
 
 pub fn convert_core_toggles_to_user_model(toggles: &core::Toggles) -> user_model::TogglesResponse {
