@@ -3,15 +3,14 @@ use crate::user_model;
 use std::collections::HashMap;
 
 pub fn map_toggles_to_toggles_response(toggles: &core::Toggles) -> user_model::TogglesResponse {
+    let mapped_toggles = toggles
+        .toggles
+        .iter()
+        .map(|toggle| (toggle.name.to_string(), toggle.value.to_string()))
+        .collect();
+
     user_model::TogglesResponse {
-        toggles: toggles
-            .toggles
-            .iter()
-            .map(|toggle| user_model::ToggleResponse {
-                name: String::from(&toggle.name),
-                value: String::from(&toggle.value),
-            })
-            .collect(),
+        toggles: mapped_toggles,
     }
 }
 
@@ -134,10 +133,7 @@ mod tests {
     #[test]
     fn test_map_feature_configs_to_features_maps_toggles() {
         let context = map_toggles_to_toggles_response(&core::Toggles {
-            toggles: vec![core::Toggle {
-                name: String::from("feature"),
-                value: String::from("value"),
-            }],
+            toggles: vec![(String::from("feature"), String::from("value"))],
         });
         assert_eq!(context.toggles.len(), 1);
         assert_eq!(context.toggles[0].name, "feature");

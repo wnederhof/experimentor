@@ -1,4 +1,5 @@
 use serde::{Deserialize, Serialize};
+use std::collections::HashMap;
 
 #[derive(Debug, Deserialize, Clone)]
 pub struct ContextConfig {
@@ -29,11 +30,5 @@ pub struct SegmentConfig {
 
 #[derive(Debug, Serialize, Clone)]
 pub struct TogglesResponse {
-    pub toggles: Vec<ToggleResponse>,
-}
-
-#[derive(Debug, Serialize, Clone)]
-pub struct ToggleResponse {
-    pub name: String,
-    pub value: String,
+    pub toggles: HashMap<String, String>,
 }

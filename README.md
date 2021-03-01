@@ -4,8 +4,8 @@ With experimentor you can create feature toggles. These feature toggles can eith
 The focus of this application is on:
 
 - **Performance**: since Experimentor is written in Rust with Actix, Experimentor is highly performant and doesn't suffer from latency due to random garbage collection events.
-- **Scalable**: even though the same result is served if the user calls the same endpoint and the set of feature toggles is evenly distributed, Experimentor does not need a database for determining the features, but instead relies on a simple settings file. As such, Experimentor will work perfectly fine, no matter how many people use it.
-- **Practical**: simple, lightweight and dual licensed under the permissive Apache 2 or MIT license at your choice makes Experimentor practical for every organization.
+- **Scalability**: even though the same result is served if the user calls the same endpoint and the set of feature toggles is evenly distributed, Experimentor does not need a database for determining the features, but instead relies on a simple settings file. As such, Experimentor will work perfectly fine, no matter how many people use it.
+- **Practicality**: simple, lightweight and dual licensed under the permissive Apache 2 or MIT license at your choice makes Experimentor practical for every organization.
 
 # Example
 Imagine you are the director of Pulp Fiction. You remastered the movie and want to test if the briefcase of Marcellus Wallace should have a silver or gold glow. The original movie had a gold glow, so you want to test if the silver glow would lead to a more enthusiastic audience.
@@ -40,25 +40,20 @@ In this case, when the endpoint `/experiments/pulp_fiction`
 is called, it will in 99% of the cases yield:
 ```
 {
-  "toggles": [
-    {
-      "name": "briefcase",
-      "value": "gold"
-    }
-  ]
+  "toggles": {
+    "briefcase": "gold"
+  }
 }
 ```
 And in 1% of the case and for users with identifiers (which can be anything, such as an IP address, a username, username hash) like `quentin_tarantino_1963`, `vincent_vega`, etc:
 ```
 {
-  "toggles": [
-    {
-      "name": "briefcase",
-      "value": "silver"
-    }
-  ]
+  "toggles": {
+    "briefcase": "silver"
+  }
 }
 ```
+As you may have noticed, the toggles are already mapped into objects, so they can be easily used by consumers such as Javascript.
 
 # Usage
 Starting the application with `experiments.yml` on port `8080`:
@@ -73,4 +68,9 @@ You can visit `http://localhost:8080/feature-toggles/vincent_vega` or `http://lo
 
 # In Progress...
 For the program described above to actually work:
-- Respond with a hash table of features instead of an array.
+- Support multiple contexts.
+- Verify probability logic.
+
+# In a Future Release...
+- Add OpenAPI specs.
+- Add YAML Schema for the config.
