@@ -14,9 +14,22 @@ pub fn map_toggles_to_toggles_response(toggles: &core::Toggles) -> user_model::T
     }
 }
 
+pub fn map_contexts_config_to_contexts(contexts: &user_model::ContextsConfig) -> core::Contexts {
+    core::Contexts {
+        contexts: contexts
+            .contexts
+            .iter()
+            .map(|elem| {
+                let elem_name = elem.name.to_string();
+                (elem_name, map_context_config_to_context(&elem))
+            })
+            .into_iter()
+            .collect(),
+    }
+}
+
 pub fn map_context_config_to_context(context: &user_model::ContextConfig) -> core::Context {
     core::Context {
-        name: String::from(&context.name),
         features: map_feature_configs_to_features(context),
         segments: map_segment_configs_to_segments(context),
     }
@@ -65,7 +78,21 @@ fn map_segment_configs_to_segments(
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::core::Toggle;
     use crate::user_model::SegmentConfig;
+
+    #[test]
+    fn test_map_contexts_config_to_contexts_maps_contexts() {
+        let contexts = map_contexts_config_to_contexts(&user_model::ContextsConfig {
+            contexts: vec![user_model::ContextConfig {
+                name: String::from("context_1"),
+                features: vec![],
+                segments: vec![],
+            }],
+        });
+        assert_eq!(contexts.contexts.contains_key("context_1"), true);
+        assert_eq!(contexts.contexts.contains_key("context_2"), false);
+    }
 
     #[test]
     fn test_map_context_config_to_context_base_case() {
@@ -74,7 +101,6 @@ mod tests {
             features: vec![],
             segments: vec![],
         });
-        assert_eq!(context.name, "some-name");
         assert_eq!(context.features.len(), 0);
         assert_eq!(context.segments.len(), 0);
     }
@@ -95,7 +121,6 @@ mod tests {
             segments: vec![],
         });
 
-        assert_eq!(context.name, "some-name");
         assert_eq!(context.features.len(), 1);
         assert_eq!(context.segments.len(), 0);
 
@@ -133,10 +158,12 @@ mod tests {
     #[test]
     fn test_map_feature_configs_to_features_maps_toggles() {
         let context = map_toggles_to_toggles_response(&core::Toggles {
-            toggles: vec![(String::from("feature"), String::from("value"))],
+            toggles: vec![Toggle {
+                name: String::from("feature"),
+                value: String::from("value"),
+            }],
         });
         assert_eq!(context.toggles.len(), 1);
-        assert_eq!(context.toggles[0].name, "feature");
-        assert_eq!(context.toggles[0].value, "value");
+        assert_eq!(context.toggles["feature"], "value");
     }
 }

@@ -16,25 +16,26 @@ This use case would map to an `experiment.yml` file that would look as following
 
 ```yaml
 ---
-name: pulp_fiction
-features:
-  - name: briefcase
-    description: A briefcase full of a certain product.
-    treatments:
-      - probability: 99
-        value: gold
-        segments: []
-      - probability: 1
-        value: silver
-        segments:
-          - beta_testers
-segments:
-  - name: beta_testers
-    user_identifiers:
-      - quentin
-      - vincent_vega
-      - butch
-      - the_wolf
+contexts:
+  - name: pulp_fiction
+    features:
+      - name: briefcase
+        description: A briefcase full of a certain product.
+        treatments:
+          - probability: 99
+            value: gold
+            segments: [ ]
+          - probability: 1
+            value: silver
+            segments:
+              - beta_testers
+    segments:
+      - name: beta_testers
+        user_identifiers:
+          - quentin
+          - vincent_vega
+          - butch
+          - the_wolf
 ```
 In this case, when the endpoint `/experiments/pulp_fiction`
 is called, it will in 99% of the cases yield:

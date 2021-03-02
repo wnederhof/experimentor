@@ -5,8 +5,12 @@ use std::collections::HashMap;
 use std::hash::{Hash, Hasher};
 
 #[derive(Debug)]
+pub struct Contexts {
+    pub contexts: HashMap<String, Context>,
+}
+
+#[derive(Debug)]
 pub struct Context {
-    pub name: String,
     pub features: Vec<Feature>,
     pub segments: HashMap<String, Vec<String>>,
 }
@@ -35,21 +39,37 @@ pub struct Toggle {
     pub value: String,
 }
 
-pub fn find_feature_toggles(user_identifier: &str, context: &Context) -> Toggles {
-    Toggles {
-        toggles: context
-            .features
-            .iter()
-            .map(|feature| Toggle {
-                name: feature.name.to_owned(),
-                value: active_treatment(user_identifier, feature, &context).to_string(),
-            })
-            .collect(),
+pub fn find_feature_toggles(
+    context_name: &str,
+    user_identifier: &str,
+    contexts: &Contexts,
+) -> Toggles {
+    match contexts.contexts.get(context_name) {
+        None => Toggles {
+            toggles: Vec::new(),
+        },
+        Some(context) => Toggles {
+            toggles: contexts.contexts[context_name]
+                .features
+                .iter()
+                .map(|feature| Toggle {
+                    // TODO add test...
+                    name: feature.name.to_owned(), // TODO unwrap...
+                    value: active_treatment(context_name, user_identifier, feature, context)
+                        .to_string(),
+                })
+                .collect(),
+        },
     }
 }
 
-fn active_treatment<'a>(user_identifier: &str, feature: &'a Feature, context: &Context) -> &'a str {
-    let mut prob = deterministic_random_probability(&context.name, user_identifier, &feature.name);
+fn active_treatment<'a>(
+    context_name: &str,
+    user_identifier: &str,
+    feature: &'a Feature,
+    context: &Context,
+) -> &'a str {
+    let mut prob = deterministic_random_probability(&context_name, user_identifier, &feature.name);
     let treatments_slice = feature.treatments.as_slice();
     let overriding_treatment =
         find_overriding_treatment(user_identifier, context, treatments_slice);
@@ -106,10 +126,17 @@ mod tests {
     fn test_find_features_empty() {
         let actual: Toggles = find_feature_toggles(
             "pulp_fiction",
-            &Context {
-                name: String::from("pulp_fiction"),
-                features: vec![],
-                segments: HashMap::new(),
+            "wouter",
+            &Contexts {
+                contexts: vec![(
+                    String::from("pulp_fiction"),
+                    Context {
+                        features: vec![],
+                        segments: HashMap::new(),
+                    },
+                )]
+                .into_iter()
+                .collect(),
             },
         );
         assert_eq!(actual.toggles.len(), 0);
@@ -119,17 +146,24 @@ mod tests {
     fn test_find_features_finds_treatment_settings_simple() {
         let actual: Toggles = find_feature_toggles(
             "pulp_fiction",
-            &Context {
-                name: String::from("pulp_fiction"),
-                features: vec![Feature {
-                    name: String::from("briefcase"),
-                    treatments: vec![Treatment {
-                        probability: 100,
-                        value: String::from("gold"),
-                        segments: vec![],
-                    }],
-                }],
-                segments: HashMap::new(),
+            "wouter",
+            &Contexts {
+                contexts: vec![(
+                    String::from("pulp_fiction"),
+                    Context {
+                        features: vec![Feature {
+                            name: String::from("briefcase"),
+                            treatments: vec![Treatment {
+                                probability: 100,
+                                value: String::from("gold"),
+                                segments: vec![],
+                            }],
+                        }],
+                        segments: HashMap::new(),
+                    },
+                )]
+                .into_iter()
+                .collect(),
             },
         );
         assert_eq!(actual.toggles.len(), 1);
@@ -138,27 +172,61 @@ mod tests {
     }
 
     #[test]
+    fn test_find_features_not_found() {
+        let actual: Toggles = find_feature_toggles(
+            "robin_hood",
+            "wouter",
+            &Contexts {
+                contexts: vec![(
+                    String::from("pulp_fiction"),
+                    Context {
+                        features: vec![Feature {
+                            name: String::from("briefcase"),
+                            treatments: vec![Treatment {
+                                probability: 100,
+                                value: String::from("gold"),
+                                segments: vec![],
+                            }],
+                        }],
+                        segments: HashMap::new(),
+                    },
+                )]
+                .into_iter()
+                .collect(),
+            },
+        );
+        assert_eq!(actual.toggles.len(), 0);
+    }
+
+    #[test]
     fn test_find_features_finds_treatment_settings_multiple() {
         let actual: Toggles = find_feature_toggles(
+            "pulp_fiction",
             "wouter",
-            &Context {
-                name: String::from("pulp_fiction"),
-                features: vec![Feature {
-                    name: String::from("briefcase"),
-                    treatments: vec![
-                        Treatment {
-                            probability: 100,
-                            value: String::from("gold"),
-                            segments: vec![],
-                        },
-                        Treatment {
-                            probability: 0,
-                            value: String::from("silver"),
-                            segments: vec![],
-                        },
-                    ],
-                }],
-                segments: HashMap::new(),
+            &Contexts {
+                contexts: vec![(
+                    String::from("pulp_fiction"),
+                    Context {
+                        features: vec![Feature {
+                            name: String::from("briefcase"),
+                            treatments: vec![
+                                Treatment {
+                                    probability: 100,
+                                    value: String::from("gold"),
+                                    segments: vec![],
+                                },
+                                Treatment {
+                                    probability: 0,
+                                    value: String::from("silver"),
+                                    segments: vec![],
+                                },
+                            ],
+                        }],
+                        segments: HashMap::new(),
+                    },
+                )]
+                .into_iter()
+                .collect(),
             },
         );
         assert_eq!(actual.toggles.len(), 1);
@@ -169,27 +237,34 @@ mod tests {
     #[test]
     fn test_segments_override_it_all() {
         let actual: Toggles = find_feature_toggles(
+            "pulp_fiction",
             "wouter",
-            &Context {
-                name: String::from("pulp_fiction"),
-                features: vec![Feature {
-                    name: String::from("briefcase"),
-                    treatments: vec![
-                        Treatment {
-                            probability: 100,
-                            value: String::from("gold"),
-                            segments: vec![],
-                        },
-                        Treatment {
-                            probability: 0,
-                            value: String::from("silver"),
-                            segments: vec![String::from("beta-tester")],
-                        },
-                    ],
-                }],
-                segments: vec![(String::from("beta-tester"), vec![String::from("wouter")])]
-                    .into_iter()
-                    .collect(),
+            &Contexts {
+                contexts: vec![(
+                    String::from("pulp_fiction"),
+                    Context {
+                        features: vec![Feature {
+                            name: String::from("briefcase"),
+                            treatments: vec![
+                                Treatment {
+                                    probability: 100,
+                                    value: String::from("gold"),
+                                    segments: vec![],
+                                },
+                                Treatment {
+                                    probability: 0,
+                                    value: String::from("silver"),
+                                    segments: vec![String::from("beta-tester")],
+                                },
+                            ],
+                        }],
+                        segments: vec![(String::from("beta-tester"), vec![String::from("wouter")])]
+                            .into_iter()
+                            .collect(),
+                    },
+                )]
+                .into_iter()
+                .collect(),
             },
         );
         assert_eq!(actual.toggles.len(), 1);

@@ -2,6 +2,11 @@ use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 
 #[derive(Debug, Deserialize, Clone)]
+pub struct ContextsConfig {
+    pub contexts: Vec<ContextConfig>,
+}
+
+#[derive(Debug, Deserialize, Clone)]
 pub struct ContextConfig {
     pub name: String,
     pub features: Vec<FeatureConfig>,

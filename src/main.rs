@@ -1,6 +1,6 @@
 use actix_web::{web, App, HttpRequest, HttpServer, Responder};
 use experimentor::core;
-use experimentor::mapper::{map_context_config_to_context, map_toggles_to_toggles_response};
+use experimentor::mapper::{map_contexts_config_to_contexts, map_toggles_to_toggles_response};
 use experimentor::user_model;
 use std::env;
 use std::process::exit;
@@ -26,7 +26,7 @@ async fn main() -> std::io::Result<()> {
         exit(1);
     });
 
-    let context: user_model::ContextConfig = serde_yaml::from_reader(file).unwrap_or_else(|err| {
+    let context: user_model::ContextsConfig = serde_yaml::from_reader(file).unwrap_or_else(|err| {
         eprintln!("Unable to parse. Error: {}.", err);
         exit(1);
     });
@@ -34,7 +34,7 @@ async fn main() -> std::io::Result<()> {
     println!("Starting server on port {}.", port);
     HttpServer::new(move || {
         App::new().data(context.clone()).route(
-            "/feature-toggles/{user_identifier}",
+            "/contexts/{context_name}/feature-toggles/{user_identifier}",
             web::get().to(feature_toggles_handler),
         )
     })
@@ -47,13 +47,15 @@ async fn main() -> std::io::Result<()> {
 
 async fn feature_toggles_handler(
     req: HttpRequest,
-    data: web::Data<user_model::ContextConfig>,
+    data: web::Data<user_model::ContextsConfig>,
 ) -> impl Responder {
+    let context_name = req.match_info().get("context_name").unwrap();
     let user_identifier = req.match_info().get("user_identifier").unwrap();
     web::Json(map_toggles_to_toggles_response(
         &core::find_feature_toggles(
+            context_name,
             user_identifier,
-            &map_context_config_to_context(data.get_ref()),
+            &map_contexts_config_to_contexts(data.get_ref()),
         ),
     ))
 }
