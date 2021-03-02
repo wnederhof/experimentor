@@ -15,7 +15,6 @@ Of course, you don't want each and every user to immediately see the silver glow
 This use case would map to an `experiment.yml` file that would look as following:
 
 ```yaml
----
 contexts:
   - name: pulp_fiction
     features:

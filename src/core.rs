@@ -53,8 +53,7 @@ pub fn find_feature_toggles(
                 .features
                 .iter()
                 .map(|feature| Toggle {
-                    // TODO add test...
-                    name: feature.name.to_owned(), // TODO unwrap...
+                    name: feature.name.to_owned(),
                     value: active_treatment(context_name, user_identifier, feature, context)
                         .to_string(),
                 })
