@@ -7,6 +7,8 @@ The focus of this application is on:
 - **Scalability**: even though the same result is served if the user calls the same endpoint and the set of feature toggles is evenly distributed, Experimentor does not need a database for determining the features, but instead relies on a simple settings file. As such, Experimentor will work perfectly fine, no matter how many people use it.
 - **Practicality**: simple, lightweight and dual licensed under the permissive Apache 2 or MIT license at your choice makes Experimentor practical for every organization.
 
+NOTE: This project was created as an exercise to learn the Rust programming language. While the program may be useful for some of your purposes, currently there are no big plans for this project. More than anything, the project may be a great way to learn more about Rust. :-)
+
 # Example
 Imagine you are the director of Pulp Fiction. You remastered the movie and want to test if the briefcase of Marcellus Wallace should have a silver or gold glow. The original movie had a gold glow, so you want to test if the silver glow would lead to a more enthusiastic audience.
 
@@ -36,24 +38,39 @@ contexts:
           - butch
           - the_wolf
 ```
-In this case, when the endpoint `/experiments/pulp_fiction`
+In this case, when the endpoint `/contexts/pulp_fiction/feature-toggles/mia`
 is called, it will in 99% of the cases yield:
 ```
 {
+  "hash": "cS6RYT8M3Bo=",
+  "status": "OK",
   "toggles": {
     "briefcase": "gold"
   }
 }
 ```
-And in 1% of the case and for users with identifiers (which can be anything, such as an IP address, a username, username hash) like `quentin_tarantino_1963`, `vincent_vega`, etc:
+And in 1% of the case and for users with identifiers (which can be anything, such as an IP address, a username, username hash) like `quentin`, `vincent_vega`, etc:
 ```
 {
   "toggles": {
+    "hash": "m+oyVfDL3yc=",
+    "status": "OK",
     "briefcase": "silver"
   }
 }
 ```
-As you may have noticed, the toggles are already mapped into objects, so they can be easily used by consumers such as Javascript.
+And when the hash is provided, we can save some bandwidth, e.g.: `/contexts/pulp_fiction/feature-toggles/jamie_oliver?hash=cS6RYT8M3Bo%3D`
+```
+{
+  "status": "CACHE_OK"
+}
+```
+Yet, when we point to the wrong context, e.g. `/contexts/big_lebowski/feature-toggles/his_dudeness`, we get:
+```
+{
+  "status": "NOT_FOUND"
+}
+```
 
 # Usage
 Starting the application with `experiments.yml` on port `8080`:
@@ -64,7 +81,16 @@ Or from the code:
 ```
 cargo run example.yml 8080
 ```
-You can visit `http://localhost:8080/feature-toggles/vincent_vega` or `http://localhost:8080/feature-toggles/someone_else` to see the response.
+
+# Health Checks
+Experimentor is designed for use in cloud services. When using Experimentor in Kubernetes, for instance, you can provide the following endpoints for the liveness and readiness probe, so that you can do a rolling restart when the settings are updated:
+```
+/health
+```
+All this endpoint will ever do is respond with a 200 status code when the server is ready to serve requests.
+
+# PII and Privacy
+Since Experimentor can be used on-premise, there is no (additional) risk of leaking PII data.
 
 # In Progress...
 For the program described above to actually work:

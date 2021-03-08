@@ -28,12 +28,12 @@ pub struct Treatment {
     pub value: String,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Hash)]
 pub struct Toggles {
     pub toggles: Vec<Toggle>,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Hash)]
 pub struct Toggle {
     pub name: String,
     pub value: String,

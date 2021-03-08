@@ -1,17 +1,44 @@
 use crate::core;
 use crate::user_model;
+use std::collections::hash_map::DefaultHasher;
 use std::collections::HashMap;
+use std::hash::{Hash, Hasher};
 
-pub fn map_toggles_to_toggles_response(toggles: &core::Toggles) -> user_model::TogglesResponse {
+pub fn map_toggles_to_toggles_response(
+    opt_input_hash: Option<&str>,
+    toggles: &core::Toggles,
+) -> user_model::TogglesResponse {
     let mapped_toggles = toggles
         .toggles
         .iter()
         .map(|toggle| (toggle.name.to_string(), toggle.value.to_string()))
         .collect();
 
-    user_model::TogglesResponse {
-        toggles: mapped_toggles,
+    let mapped_hash = base64::encode(calculate_hash(&toggles).to_ne_bytes());
+
+    match opt_input_hash {
+        Some(input_hash) if mapped_hash.eq(input_hash) => user_model::TogglesResponse {
+            hash: None,
+            status: user_model::ResponseStatus::CacheOk,
+            toggles: None,
+        },
+        Some(_) if toggles.toggles.len() == 0 => user_model::TogglesResponse {
+            hash: None,
+            status: user_model::ResponseStatus::NotFound,
+            toggles: None,
+        },
+        _ => user_model::TogglesResponse {
+            hash: Some(base64::encode(calculate_hash(&toggles).to_ne_bytes())),
+            status: user_model::ResponseStatus::Ok,
+            toggles: Some(mapped_toggles),
+        },
     }
+}
+
+fn calculate_hash<T: Hash>(t: &T) -> u64 {
+    let mut s = DefaultHasher::new();
+    t.hash(&mut s);
+    s.finish()
 }
 
 pub fn map_contexts_config_to_contexts(contexts: &user_model::ContextsConfig) -> core::Contexts {
@@ -151,18 +178,21 @@ mod tests {
 
     #[test]
     fn test_map_feature_configs_to_features_base_case() {
-        let context = map_toggles_to_toggles_response(&core::Toggles { toggles: vec![] });
+        let context = map_toggles_to_toggles_response(None, &core::Toggles { toggles: vec![] });
         assert_eq!(context.toggles.len(), 0);
     }
 
     #[test]
     fn test_map_feature_configs_to_features_maps_toggles() {
-        let context = map_toggles_to_toggles_response(&core::Toggles {
-            toggles: vec![Toggle {
-                name: String::from("feature"),
-                value: String::from("value"),
-            }],
-        });
+        let context = map_toggles_to_toggles_response(
+            None,
+            &core::Toggles {
+                toggles: vec![Toggle {
+                    name: String::from("feature"),
+                    value: String::from("value"),
+                }],
+            },
+        );
         assert_eq!(context.toggles.len(), 1);
         assert_eq!(context.toggles["feature"], "value");
     }

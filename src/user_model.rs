@@ -33,7 +33,20 @@ pub struct SegmentConfig {
     pub user_identifiers: Vec<String>,
 }
 
+#[serde(rename_all = "SCREAMING_SNAKE_CASE")]
+#[derive(Debug, Serialize, Clone)]
+pub enum ResponseStatus {
+    Ok,
+    NotFound,
+    CacheOk,
+}
+
 #[derive(Debug, Serialize, Clone)]
 pub struct TogglesResponse {
-    pub toggles: HashMap<String, String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub hash: Option<String>,
+    pub status: ResponseStatus,
+
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub toggles: Option<HashMap<String, String>>,
 }
