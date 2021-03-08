@@ -1,5 +1,5 @@
 # Experimentor
-With experimentor you can create feature toggles. These feature toggles can either be toggled based on probability (between 0 and 100), or by segment (e.g. "beta-tester", etc.).
+Experimentor allows you to create feature toggles. These feature toggles can either be toggled based on probability (between 0 and 100), or by segment (e.g. "beta-tester", etc.). The program can be run from a simple yaml file, it is extremely performant and no database is required.
 
 The focus of this application is on:
 
