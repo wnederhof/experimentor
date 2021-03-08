@@ -9,20 +9,6 @@ The focus of this application is on:
 
 **NOTE:** This project was created as an exercise to learn the Rust programming language. While the program may be useful for some of your purposes, currently there are no big plans for this project. More than anything, the project may be a great way to learn more about Rust. :-)
 
-# Performance
-Did I say... Extremely performant? A quick Apache Bench on an M1 Apple Macbook Air with 128 concurrent connections tells us that's a pretty accurate description:
-
-```
-$ ab -n 5000 -c 128 http://127.0.0.1:8080/contexts/pulp_fiction/feature-toggles/quentin
-...
-Time per request:       4.689 [ms] (mean)
-Time per request:       0.037 [ms] (mean, across all concurrent requests)
-Transfer rate:          4745.54 [Kbytes/sec] received
-...
-```
-Yes, that is 0.037 milliseconds, or 37 microseconds per request. Sweet!
-
-
 # Example
 Imagine you are the director of Pulp Fiction. You remastered the movie and want to test if the briefcase of Marcellus Wallace should have a silver or gold glow. The original movie had a gold glow, so you want to test if the silver glow would lead to a more enthusiastic audience.
 
@@ -103,14 +89,28 @@ Experimentor is designed for use in cloud services. When using Experimentor in K
 ```
 All this endpoint will ever do is respond with a 200 status code when the server is ready to serve requests.
 
-# PII and Privacy
-Since Experimentor can be used on-premise, there is no (additional) risk of leaking PII data.
+# PII
+Since Experimentor can be used on-premise, there is no (additional) risk of leaking PII data. Experimentor also doesn't use a database.
+
+# Performance
+Did I say... Extremely performant? A quick Apache Bench on an M1 Apple Macbook Air with 128 concurrent connections tells us that's a pretty accurate description:
+
+```
+$ ab -n 5000 -c 128 http://127.0.0.1:8080/contexts/pulp_fiction/feature-toggles/quentin
+...
+Time per request:       4.689 [ms] (mean)
+Time per request:       0.037 [ms] (mean, across all concurrent requests)
+Transfer rate:          4745.54 [Kbytes/sec] received
+...
+```
+Yes, that is 0.037 milliseconds, or 37 microseconds per request. Sweet!
+
 
 # In Progress...
 For the program described above to actually work:
-- Support multiple contexts.
-- Verify probability logic.
+- Verify probability logic. It may, or it may not be, correct. Requires proper investigation.
 
 # In a Future Release...
 - Add OpenAPI specs.
 - Add YAML Schema for the config.
+- Add a Helm chart.
