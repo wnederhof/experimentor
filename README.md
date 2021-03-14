@@ -92,7 +92,7 @@ Experimentor is designed for use in cloud services. When using Experimentor in K
 All this endpoint will ever do is respond with a 200 status code when the server is ready to serve requests.
 
 # Performance
-Did I say... Extremely performant? A quick Apache Bench on an M1 Apple Macbook Air with 128 concurrent connections tells us that's a pretty accurate description:
+Did I say... Performant? A quick Apache Bench on an M1 Apple Macbook Air with 128 concurrent connections tells us that Experimentor is... Not slow:
 
 ```
 $ ab -n 5000 -c 128 http://127.0.0.1:8080/contexts/pulp_fiction/feature-toggles/quentin
