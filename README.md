@@ -5,7 +5,7 @@ The focus of this application is on:
 
 - **Performance**: since Experimentor is written in Rust with Actix, Experimentor is highly performant and doesn't suffer from latency due to random garbage collection events.
 - **Scalability**: even though the same result is served if the user calls the same endpoint and the set of feature toggles is evenly distributed, Experimentor does not need a database for determining the features, but instead relies on a simple settings file. As such, Experimentor will work perfectly fine, no matter how many people use it.
-- **Practicality**: simple and lightweight.
+- **Practicality**: simple and lightweight, with virtually no bells and whistles.
 
 Licensed AGPL.
 
