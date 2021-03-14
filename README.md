@@ -9,8 +9,6 @@ The focus of this application is on:
 
 **NOTE:** This project was created as an exercise to learn the Rust programming language. While the program may be useful for some of your purposes, currently there are no big plans for this project. More than anything, the project may be a great way to learn more about Rust. :-)
 
-FOR EDUCATIONAL / NON-COMMERCIAL PURPOSES ONLY!
-
 # Example
 Imagine you are the director of Pulp Fiction. You remastered the movie and want to test if the briefcase of Marcellus Wallace should have a silver or gold glow. The original movie had a gold glow, so you want to test if the silver glow would lead to a more enthusiastic audience.
 
